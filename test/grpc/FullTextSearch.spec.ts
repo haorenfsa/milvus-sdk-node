@@ -543,6 +543,17 @@ describe(`FulltextSearch API`, () => {
         },
       });
 
+      // Skip if Milvus server lacks OpenAI credentials (e.g. fork PRs in CI)
+      if (
+        addFunction.error_code === ErrorCode.UnexpectedError &&
+        addFunction.reason?.includes('Missing credentials')
+      ) {
+        console.warn(
+          'Skipping: Milvus server missing OpenAI API key configuration'
+        );
+        return;
+      }
+
       if (addFunction.error_code !== ErrorCode.SUCCESS) {
         console.log(
           'Add function error:',
@@ -583,6 +594,17 @@ describe(`FulltextSearch API`, () => {
         },
       });
 
+      // Skip if Milvus server lacks OpenAI credentials (e.g. fork PRs in CI)
+      if (
+        alterFunction.error_code === ErrorCode.UnexpectedError &&
+        alterFunction.reason?.includes('Missing credentials')
+      ) {
+        console.warn(
+          'Skipping: Milvus server missing OpenAI API key configuration'
+        );
+        return;
+      }
+
       expect(alterFunction.error_code).toEqual(ErrorCode.SUCCESS);
 
       // Verify function was altered
@@ -605,6 +627,17 @@ describe(`FulltextSearch API`, () => {
         collection_name: COLLECTION_FOR_FUNCTION_OPS,
         function_name: 'embedding_new',
       });
+
+      // Skip if Milvus server lacks OpenAI credentials (function was never added)
+      if (
+        dropFunction.error_code === ErrorCode.UnexpectedError &&
+        dropFunction.reason?.includes('not found')
+      ) {
+        console.warn(
+          'Skipping: function was not added (likely missing OpenAI API key)'
+        );
+        return;
+      }
 
       expect(dropFunction.error_code).toEqual(ErrorCode.SUCCESS);
 
